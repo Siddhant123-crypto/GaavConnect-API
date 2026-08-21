@@ -1,3 +1,22 @@
+# Dependencies (re-installed inside the image)
 node_modules
-npm-debug.log
+
+# Git
+.git
+.gitignore
+
+# Env files (pass secrets via env vars or Docker secrets at runtime)
 .env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode
+.idea

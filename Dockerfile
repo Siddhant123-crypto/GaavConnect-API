@@ -1,19 +1,41 @@
-FROM node:18-alpine
+# ─────────────────────────────────────────────
+#  Stage 1 – deps (install production packages)
+# ─────────────────────────────────────────────
+FROM node:20-alpine AS deps
 
-# Create app directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-COPY package*.json ./
+# Copy manifest files only (better layer caching)
+COPY package.json package-lock.json ./
 
-RUN npm install
+# Install production dependencies only
+RUN npm ci --omit=dev
 
-# Bundle app source
+# ─────────────────────────────────────────────
+#  Stage 2 – final image
+# ─────────────────────────────────────────────
+FROM node:20-alpine AS runner
+
+# Create a non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# Copy node_modules from the deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy application source
 COPY . .
 
-# Expose the port the app runs on
-EXPOSE 5000
+# Drop root privileges
+USER appuser
 
-# Start the application
-CMD [ "node", "server.js" ]
+# Expose the port your app listens on
+EXPOSE 8080
+
+# Health-check so Docker / orchestrators know when the app is ready
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+  CMD wget -qO- http://localhost:8080/health || exit 1
+
+# Start the server
+CMD ["node", "server.js"]
