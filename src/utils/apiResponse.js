@@ -1,11 +1,10 @@
 
 class ApiResponse {
 
-    static success(res, { statusCode = 200, message = 'Success' }) {
-        return res.status(statusCode).json({
-            success: true,
-            message
-        });
+    static success(res, { statusCode = 200, message = 'Success', data = null }) {
+        const response = { success: true, message };
+        if (data) response.data = data;
+        return res.status(statusCode).json(response);
     }
 
     static error(res, { statusCode = 500, message = 'Internal Server Error', errors = null }) {
