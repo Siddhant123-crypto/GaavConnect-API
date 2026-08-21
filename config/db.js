@@ -6,7 +6,7 @@ const db = mysql.createConnection({
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD || "pass@123",
     database: process.env.DB_NAME || "gaavconnect",
-    ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false
+    ssl: { rejectUnauthorized: false }
 });
 
 db.connect(function (err) {
