@@ -5,16 +5,13 @@ const User = {
 
     create: function (userData, callback) {
 
-        const userId = randomUUID();
-
         const sql = `
             INSERT INTO users
-            (id, full_name, mobile, email, address, pincode, state, profession, password)
+            (full_name, mobile, email, address, pincode, state, profession, user_type, password)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const values = [
-            userId,
             userData.fullName,
             userData.mobile,
             userData.email,
@@ -22,17 +19,16 @@ const User = {
             userData.pincode,
             userData.state,
             userData.profession,
+            userData.userType,
             userData.password
         ];
 
         db.query(sql, values, function (err, result) {
-
             if (err) {
                 return callback(err);
             }
-
             callback(null, {
-                insertId: userId
+                insertId: result.insertId
             });
         });
     },
@@ -40,15 +36,7 @@ const User = {
     findById: function (id, callback) {
 
         const sql = `
-            SELECT
-                id,
-                full_name,
-                mobile,
-                email,
-                address,
-                pincode,
-                state,
-                profession
+            SELECT *
             FROM users
             WHERE id = ?
         `;
