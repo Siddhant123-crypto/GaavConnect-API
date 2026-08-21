@@ -83,7 +83,21 @@ const forgotPassword = async (req, res, next) => {
 
 const resetPassword = async (req, res, next) => {
     try {
-        const { token, password } = req.body;
+        const { password } = req.body;
+        let token = null;
+
+        // Check for Bearer token in Authorization header
+        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+            token = req.headers.authorization.split(' ')[1];
+        }
+
+        if (!token) {
+            return ApiResponse.error(res, {
+                statusCode: 400,
+                message: 'Token is required in Authorization header as Bearer token'
+            });
+        }
+
         const result = await authService.resetPassword(token, password);
 
         return ApiResponse.success(res, {

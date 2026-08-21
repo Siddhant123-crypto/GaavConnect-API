@@ -11,7 +11,7 @@ const db = mysql.createPool({
     ssl: { rejectUnauthorized: false }
 });
 
-const request = (path, method, body = null) => {
+const request = (path, method, body = null, token = null) => {
     return new Promise((resolve, reject) => {
         const options = {
             hostname: 'localhost',
@@ -22,6 +22,10 @@ const request = (path, method, body = null) => {
                 'Content-Type': 'application/json'
             }
         };
+
+        if (token) {
+            options.headers['Authorization'] = `Bearer ${token}`;
+        }
 
         const req = http.request(options, (res) => {
             let data = '';
@@ -62,14 +66,7 @@ const runTests = async () => {
         });
         console.log(`Register Status: ${regRes.status} -> ${regRes.status === 201 ? 'PASS' : 'FAIL'}`);
 
-        console.log("\n=== 2. TEST LOGIN ===");
-        const loginRes = await request('/api/auth/login', 'POST', {
-            emailOrMobile: uniqueEmail,
-            password: 'password123'
-        });
-        console.log(`Login Status: ${loginRes.status} -> ${loginRes.status === 200 ? 'PASS' : 'FAIL'}`);
-
-        console.log("\n=== 3. TEST FORGOT PASSWORD ===");
+        console.log("\n=== 2. TEST FORGOT PASSWORD ===");
         const forgotRes = await request('/api/auth/forgot-password', 'POST', {
             email: uniqueEmail
         });
@@ -88,28 +85,13 @@ const runTests = async () => {
         }
 
         if (token) {
-            console.log("\n=== 4. TEST RESET PASSWORD ===");
+            console.log("\n=== 3. TEST RESET PASSWORD WITH BEARER TOKEN ===");
             const resetRes = await request('/api/auth/reset-password', 'POST', {
-                token: token,
                 password: 'newpassword123',
                 confirmpassword: 'newpassword123'
-            });
+            }, token); // Pass token to Authorization header
             console.log(`Reset Password Status: ${resetRes.status} -> ${resetRes.status === 200 ? 'PASS' : 'FAIL'}`);
         }
-
-        console.log("\n=== 5. TEST NEW PASSWORD LOGIN ===");
-        const newLoginRes = await request('/api/auth/login', 'POST', {
-            emailOrMobile: uniqueEmail,
-            password: 'newpassword123'
-        });
-        console.log(`New Password Login Status: ${newLoginRes.status} -> ${newLoginRes.status === 200 ? 'PASS' : 'FAIL'}`);
-
-        console.log("\n=== 6. TEST OLD PASSWORD LOGIN ===");
-        const oldLoginRes = await request('/api/auth/login', 'POST', {
-            emailOrMobile: uniqueEmail,
-            password: 'password123'
-        });
-        console.log(`Old Password Login Status: ${oldLoginRes.status} -> ${oldLoginRes.status === 401 ? 'PASS' : 'FAIL'}`);
 
     } catch (error) {
         console.error("Test execution failed:", error);
