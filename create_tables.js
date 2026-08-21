@@ -31,6 +31,18 @@ CREATE TABLE IF NOT EXISTS sarpanch (
 );
 `;
 
+const createPasswordResetsTable = `
+CREATE TABLE IF NOT EXISTS password_resets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    otp VARCHAR(10) NOT NULL,
+    token VARCHAR(100) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+`;
+
 db.query(createUsersTable, (err, result) => {
     if (err) console.error("Error creating users table:", err);
     else console.log("Users table created successfully");
@@ -39,6 +51,11 @@ db.query(createUsersTable, (err, result) => {
         if (err) console.error("Error creating sarpanch table:", err);
         else console.log("Sarpanch table created successfully");
         
-        process.exit();
+        db.query(createPasswordResetsTable, (err, result) => {
+            if (err) console.error("Error creating password_resets table:", err);
+            else console.log("Password_resets table created successfully");
+            
+            process.exit();
+        });
     });
 });

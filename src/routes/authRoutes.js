@@ -3,7 +3,9 @@ const router  = express.Router();
 
 const authController                  = require('../controllers/authController');
 const { registerValidator,
-        loginValidator }              = require('../validators/authValidator');
+        loginValidator,
+        forgotPasswordValidator,
+        resetPasswordValidator }      = require('../validators/authValidator');
 
 // POST /api/auth/user/register
 router.post('/user/register', (req, res, next) => {
@@ -19,5 +21,11 @@ router.post('/sarpanch/register', (req, res, next) => {
 
 // POST /api/auth/login
 router.post('/login', loginValidator, authController.login);
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', forgotPasswordValidator, authController.forgotPassword);
+
+// POST /api/auth/reset-password
+router.post('/reset-password', resetPasswordValidator, authController.resetPassword);
 
 module.exports = router;

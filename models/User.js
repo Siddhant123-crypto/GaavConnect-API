@@ -74,6 +74,23 @@ const User = {
         `;
 
         db.query(sql, [mobile], callback);
+    },
+
+    findByEmailOrMobile: function (emailOrMobile, callback) {
+        const sql = `
+            SELECT * FROM users
+            WHERE email = ? OR mobile = ?
+        `;
+        db.query(sql, [emailOrMobile, emailOrMobile], callback);
+    },
+
+    updatePassword: function (id, newPassword, callback) {
+        const sql = `
+            UPDATE users
+            SET password = ?
+            WHERE id = ?
+        `;
+        db.query(sql, [newPassword, id], callback);
     }
 };
 

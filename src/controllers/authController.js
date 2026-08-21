@@ -53,4 +53,52 @@ const login = async (req, res, next) => {
     }
 };
 
-module.exports = { register, login };
+/* ═══════════════════════════════════════════
+   FORGOT PASSWORD  –  POST /api/auth/forgot-password
+═══════════════════════════════════════════ */
+
+const forgotPassword = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const result = await authService.forgotPassword(email);
+
+        return ApiResponse.success(res, {
+            statusCode: 200,
+            message: result.message
+        });
+    } catch (error) {
+        if (error.statusCode) {
+            return ApiResponse.error(res, {
+                statusCode: error.statusCode,
+                message: error.message
+            });
+        }
+        next(error);
+    }
+};
+
+/* ═══════════════════════════════════════════
+   RESET PASSWORD  –  POST /api/auth/reset-password
+═══════════════════════════════════════════ */
+
+const resetPassword = async (req, res, next) => {
+    try {
+        const { token, otp, newPassword } = req.body;
+        const result = await authService.resetPassword(token, otp, newPassword);
+
+        return ApiResponse.success(res, {
+            statusCode: 200,
+            message: result.message
+        });
+    } catch (error) {
+        if (error.statusCode) {
+            return ApiResponse.error(res, {
+                statusCode: error.statusCode,
+                message: error.message
+            });
+        }
+        next(error);
+    }
+};
+
+module.exports = { register, login, forgotPassword, resetPassword };

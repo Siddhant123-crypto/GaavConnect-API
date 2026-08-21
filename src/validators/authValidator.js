@@ -99,4 +99,38 @@ const loginValidator = [
     handleValidationErrors
 ];
 
-module.exports = { registerValidator, loginValidator };
+/* ────────────────── forgot password validator ────────────────── */
+
+const forgotPasswordValidator = [
+    body('email')
+        .trim()
+        .notEmpty().withMessage('Email is required')
+        .isEmail().withMessage('Enter a valid email address')
+        .normalizeEmail(),
+    handleValidationErrors
+];
+
+/* ────────────────── reset password validator ────────────────── */
+
+const resetPasswordValidator = [
+    body('token')
+        .trim()
+        .notEmpty().withMessage('Token is required'),
+        
+    body('otp')
+        .trim()
+        .notEmpty().withMessage('OTP is required'),
+
+    body('newPassword')
+        .notEmpty().withMessage('New password is required')
+        .isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+
+    handleValidationErrors
+];
+
+module.exports = { 
+    registerValidator, 
+    loginValidator, 
+    forgotPasswordValidator, 
+    resetPasswordValidator 
+};
