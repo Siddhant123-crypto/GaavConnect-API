@@ -64,7 +64,8 @@ const forgotPassword = async (req, res, next) => {
 
         return ApiResponse.success(res, {
             statusCode: 200,
-            message: result.message
+            message: result.message,
+            data: { token: result.token }
         });
     } catch (error) {
         if (error.statusCode) {
