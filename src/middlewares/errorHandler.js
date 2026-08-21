@@ -8,8 +8,9 @@ const errorHandler = (err, req, res, next) => {
 
     return ApiResponse.error(res, {
         statusCode: 500,
-        message: 'Internal server error'
+        message: err.message || 'Internal server error'
     });
 };
 
 module.exports = errorHandler;
+

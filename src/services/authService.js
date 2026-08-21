@@ -1,16 +1,13 @@
 const bcrypt = require('bcryptjs');
 const jwt    = require('jsonwebtoken');
-const crypto = require('crypto');
-const User   = require('../../models/User');
-const PasswordReset = require('../../models/PasswordReset');
-const { sendResetEmail } = require('../../utils/emailService');
+const User   = require('../models/User');
 
 /* ───────────── helpers ───────────── */
 
 const generateToken = (user) =>
     jwt.sign(
-        { id: user.id || user.insertId, userType: user.user_type },
-        process.env.JWT_SECRET || 'super_secret_fallback_key',
+        { id: user.id, userType: user.user_type },
+        process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
@@ -20,6 +17,7 @@ const generateToken = (user) =>
 ═══════════════════════════════════════════ */
 
 const register = async (userData) => {
+
     const {
         fullName,
         mobile,
@@ -34,17 +32,11 @@ const register = async (userData) => {
 
     /* ── 1. duplicate checks ── */
 
-    const findByEmail = (e) => new Promise((resolve, reject) => {
-        User.findByEmail(e, (err, rows) => err ? reject(err) : resolve(rows));
-    });
-    const emailRows = await findByEmail(email);
+    const emailRows = await User.findByEmail(email);
     if (emailRows.length > 0)
         throw Object.assign(new Error('Email is already registered'), { statusCode: 409 });
 
-    const findByMobile = (m) => new Promise((resolve, reject) => {
-        User.findByMobile(m, (err, rows) => err ? reject(err) : resolve(rows));
-    });
-    const mobileRows = await findByMobile(mobile);
+    const mobileRows = await User.findByMobile(mobile);
     if (mobileRows.length > 0)
         throw Object.assign(new Error('Mobile number is already registered'), { statusCode: 409 });
 
@@ -54,11 +46,7 @@ const register = async (userData) => {
 
     /* ── 3. insert user ── */
 
-    const createUser = (data) => new Promise((resolve, reject) => {
-        User.create(data, (err, result) => err ? reject(err) : resolve(result));
-    });
-
-    const { insertId } = await createUser({
+    const { insertId } = await User.create({
         fullName,
         mobile,
         email,
@@ -72,12 +60,8 @@ const register = async (userData) => {
 
     /* ── 4. fetch newly created user ── */
 
-    const findById = (id) => new Promise((resolve, reject) => {
-        User.findById(id, (err, rows) => err ? reject(err) : resolve(rows));
-    });
-
-    const rows = await findById(insertId);
-    const newUser = rows[0] || { id: insertId };
+    const rows   = await User.findById(insertId);
+    const newUser = rows[0];
 
     /* ── 5. generate JWT ── */
 
@@ -94,15 +78,17 @@ const register = async (userData) => {
 const login = async (emailOrMobile, password) => {
 
     /* ── 1. find user ── */
-    const findUser = (eOrM) => new Promise((resolve, reject) => {
-        User.findByEmailOrMobile(eOrM, (err, rows) => err ? reject(err) : resolve(rows));
-    });
 
-    const rows = await findUser(emailOrMobile);
+    const rows = await User.findByEmailOrMobile(emailOrMobile);
     if (rows.length === 0)
         throw Object.assign(new Error('User not found'), { statusCode: 404 });
 
     const user = rows[0];
+
+    /* ── 2. check account status ── */
+
+    if (user.status !== 'active')
+        throw Object.assign(new Error('Account is inactive or suspended'), { statusCode: 403 });
 
     /* ── 3. verify password ── */
 
@@ -135,44 +121,29 @@ const login = async (emailOrMobile, password) => {
 };
 
 /* ═══════════════════════════════════════════
-   FORGOT PASSWORD
-   POST /api/auth/forgot-password
+   FORGET PASSWORD
+   POST /api/auth/forget-password
 ═══════════════════════════════════════════ */
 
-const forgotPassword = async (emailOrMobile, newPassword) => {
-    // 1. Find the user
-    const findUser = () => new Promise((resolve, reject) => {
-        User.findByEmail(emailOrMobile, (err, rows) => {
-            if (err) return reject(err);
-            if (rows.length === 0) {
-                User.findByMobile(emailOrMobile, (err, mobileRows) => {
-                    if (err) return reject(err);
-                    resolve(mobileRows);
-                });
-            } else {
-                resolve(rows);
-            }
-        });
-    });
+const forgetPassword = async (emailOrMobile, newPassword) => {
 
-    const rows = await findUser();
-    if (!rows || rows.length === 0) {
+    /* ── 1. find user ── */
+    const rows = await User.findByEmailOrMobile(emailOrMobile);
+    if (rows.length === 0)
         throw Object.assign(new Error('User not found'), { statusCode: 404 });
-    }
 
     const user = rows[0];
 
-    // 2. Hash the new password
+    /* ── 2. hash new password ── */
     const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-    // Update password
-    const updatePwd = () => new Promise((resolve, reject) => {
-        User.updatePassword(user.id, hashedPassword, (err, result) => err ? reject(err) : resolve(result));
-    });
-
-    await updatePwd();
+    /* ── 3. update password ── */
+    const updated = await User.updatePassword(user.id, hashedPassword);
+    if (!updated)
+        throw Object.assign(new Error('Failed to update password'), { statusCode: 500 });
 
     return { message: 'Password updated successfully' };
 };
 
-module.exports = { register, login, forgotPassword };
+module.exports = { register, login, forgetPassword };
+

@@ -99,9 +99,10 @@ const loginValidator = [
     handleValidationErrors
 ];
 
-/* ────────────────── forgot password validator ────────────────── */
+/* ────────────────── forget password validator ────────────────── */
 
-const forgotPasswordValidator = [
+const forgetPasswordValidator = [
+
     body('emailOrMobile')
         .trim()
         .notEmpty().withMessage('Email or mobile number is required')
@@ -115,7 +116,7 @@ const forgotPasswordValidator = [
         .notEmpty().withMessage('Password is required')
         .isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
 
-    body('confirmpassword')
+    body('confirmPassword')
         .notEmpty().withMessage('Confirm password is required')
         .custom((value, { req }) => {
             if (value !== req.body.password) throw new Error('Passwords do not match');
@@ -125,8 +126,5 @@ const forgotPasswordValidator = [
     handleValidationErrors
 ];
 
-module.exports = { 
-    registerValidator, 
-    loginValidator, 
-    forgotPasswordValidator
-};
+module.exports = { registerValidator, loginValidator, forgetPasswordValidator };
+

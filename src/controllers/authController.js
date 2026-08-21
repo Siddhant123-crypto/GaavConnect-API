@@ -54,32 +54,20 @@ const login = async (req, res, next) => {
 };
 
 /* ═══════════════════════════════════════════
-   FORGOT PASSWORD  –  POST /api/auth/forgot-password
+   FORGET PASSWORD  –  POST /api/auth/forget-password
 ═══════════════════════════════════════════ */
 
-const forgotPassword = async (req, res, next) => {
+const forgetPassword = async (req, res, next) => {
     try {
         const { emailOrMobile, password } = req.body;
-        let token = null;
 
-        // Check for Bearer token in Authorization header
-        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-            token = req.headers.authorization.split(' ')[1];
-        }
-
-        if (!token) {
-            return ApiResponse.error(res, {
-                statusCode: 400,
-                message: 'Token is required in Authorization header as Bearer token'
-            });
-        }
-
-        const result = await authService.forgotPassword(emailOrMobile, password, token);
+        const result = await authService.forgetPassword(emailOrMobile, password);
 
         return ApiResponse.success(res, {
             statusCode: 200,
             message: result.message
         });
+
     } catch (error) {
         if (error.statusCode) {
             return ApiResponse.error(res, {
@@ -91,4 +79,5 @@ const forgotPassword = async (req, res, next) => {
     }
 };
 
-module.exports = { register, login, forgotPassword };
+module.exports = { register, login, forgetPassword };
+

@@ -30,3 +30,4 @@ const initDB = async () => {
 };
 
 module.exports = initDB;
+
