@@ -4,8 +4,7 @@ const router  = express.Router();
 const authController                  = require('../controllers/authController');
 const { registerValidator,
         loginValidator,
-        forgotPasswordValidator,
-        resetPasswordValidator }      = require('../validators/authValidator');
+        forgotPasswordValidator }      = require('../validators/authValidator');
 
 // POST /api/auth/register (Generic route)
 router.post('/register', registerValidator, authController.register);
@@ -27,8 +26,5 @@ router.post('/login', loginValidator, authController.login);
 
 // POST /api/auth/forgot-password
 router.post('/forgot-password', forgotPasswordValidator, authController.forgotPassword);
-
-// POST /api/auth/reset-password
-router.post('/reset-password', resetPasswordValidator, authController.resetPassword);
 
 module.exports = router;

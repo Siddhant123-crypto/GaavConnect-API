@@ -139,95 +139,40 @@ const login = async (emailOrMobile, password) => {
    POST /api/auth/forgot-password
 ═══════════════════════════════════════════ */
 
-const forgotPassword = async (email) => {
-    const findUser = (email) => new Promise((resolve, reject) => {
-        User.findByEmailOrMobile(email, (err, rows) => err ? reject(err) : resolve(rows));
+const forgotPassword = async (emailOrMobile, newPassword) => {
+    // 1. Find the user
+    const findUser = () => new Promise((resolve, reject) => {
+        User.findByEmail(emailOrMobile, (err, rows) => {
+            if (err) return reject(err);
+            if (rows.length === 0) {
+                User.findByMobile(emailOrMobile, (err, mobileRows) => {
+                    if (err) return reject(err);
+                    resolve(mobileRows);
+                });
+            } else {
+                resolve(rows);
+            }
+        });
     });
 
-    const rows = await findUser(email);
+    const rows = await findUser();
     if (!rows || rows.length === 0) {
         throw Object.assign(new Error('User not found'), { statusCode: 404 });
     }
 
     const user = rows[0];
 
-    // Generate secure Token (UUID)
-    const token = crypto.randomUUID();
-    
-    // Expires in 15 minutes
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); 
-
-    const createResetRecord = () => new Promise((resolve, reject) => {
-        PasswordReset.create({
-            userId: user.id,
-            otp: 'NA', // Dummy OTP since schema still requires it
-            token,
-            expiresAt
-        }, (err, result) => {
-            if (err) return reject(err);
-            resolve(result);
-        });
-    });
-
-    await createResetRecord();
-
-    // Send Email
-    try {
-        await sendResetEmail(user.email, token);
-    } catch (err) {
-        console.error("Email send error:", err);
-        // Continue even if email fails in local testing due to bad SMTP config
-    }
-
-    return { message: 'Password reset link sent to your email.', token: token };
-};
-
-/* ═══════════════════════════════════════════
-   RESET PASSWORD
-   POST /api/auth/reset-password
-═══════════════════════════════════════════ */
-
-const resetPassword = async (token, newPassword) => {
-    
-    const findToken = () => new Promise((resolve, reject) => {
-        PasswordReset.findByToken(token, (err, rows) => err ? reject(err) : resolve(rows));
-    });
-
-    const rows = await findToken();
-    if (!rows || rows.length === 0) {
-        throw Object.assign(new Error('Invalid token'), { statusCode: 400 });
-    }
-
-    const resetRecord = rows[0];
-
-    // Check expiry
-    if (new Date(resetRecord.expires_at) < new Date()) {
-        throw Object.assign(new Error('Token has expired'), { statusCode: 400 });
-    }
-
-    // Check if used
-    if (resetRecord.used) {
-        throw Object.assign(new Error('Token has already been used'), { statusCode: 400 });
-    }
-
-    // Hash new password
+    // 2. Hash the new password
     const hashedPassword = await bcrypt.hash(newPassword, 12);
 
     // Update password
     const updatePwd = () => new Promise((resolve, reject) => {
-        User.updatePassword(resetRecord.user_id, hashedPassword, (err, result) => err ? reject(err) : resolve(result));
+        User.updatePassword(user.id, hashedPassword, (err, result) => err ? reject(err) : resolve(result));
     });
 
     await updatePwd();
 
-    // Mark token as used
-    const markUsed = () => new Promise((resolve, reject) => {
-        PasswordReset.markAsUsed(resetRecord.id, (err, result) => err ? reject(err) : resolve(result));
-    });
-
-    await markUsed();
-
     return { message: 'Password updated successfully' };
 };
 
-module.exports = { register, login, forgotPassword, resetPassword };
+module.exports = { register, login, forgotPassword };

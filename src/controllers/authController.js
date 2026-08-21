@@ -59,32 +59,7 @@ const login = async (req, res, next) => {
 
 const forgotPassword = async (req, res, next) => {
     try {
-        const { email } = req.body;
-        const result = await authService.forgotPassword(email);
-
-        return ApiResponse.success(res, {
-            statusCode: 200,
-            message: result.message,
-            data: { token: result.token }
-        });
-    } catch (error) {
-        if (error.statusCode) {
-            return ApiResponse.error(res, {
-                statusCode: error.statusCode,
-                message: error.message
-            });
-        }
-        next(error);
-    }
-};
-
-/* ═══════════════════════════════════════════
-   RESET PASSWORD  –  POST /api/auth/reset-password
-═══════════════════════════════════════════ */
-
-const resetPassword = async (req, res, next) => {
-    try {
-        const { password } = req.body;
+        const { emailOrMobile, password } = req.body;
         let token = null;
 
         // Check for Bearer token in Authorization header
@@ -99,7 +74,7 @@ const resetPassword = async (req, res, next) => {
             });
         }
 
-        const result = await authService.resetPassword(token, password);
+        const result = await authService.forgotPassword(emailOrMobile, password, token);
 
         return ApiResponse.success(res, {
             statusCode: 200,
@@ -116,4 +91,4 @@ const resetPassword = async (req, res, next) => {
     }
 };
 
-module.exports = { register, login, forgotPassword, resetPassword };
+module.exports = { register, login, forgotPassword };

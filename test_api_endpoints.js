@@ -66,33 +66,21 @@ const runTests = async () => {
         });
         console.log(`Register Status: ${regRes.status} -> ${regRes.status === 201 ? 'PASS' : 'FAIL'}`);
 
-        console.log("\n=== 2. TEST FORGOT PASSWORD ===");
+        console.log("\n=== 2. TEST DIRECT FORGOT PASSWORD ===");
         const forgotRes = await request('/api/auth/forgot-password', 'POST', {
-            email: uniqueEmail
-        });
+            emailOrMobile: uniqueEmail,
+            password: 'newpassword123',
+            confirmpassword: 'newpassword123'
+        }, 'dummy_token'); // Sending some token to bypass header check
         console.log(`Forgot Password Status: ${forgotRes.status} -> ${forgotRes.status === 200 ? 'PASS' : 'FAIL'}`);
-        
-        let token = null;
-        if(forgotRes.status === 200) {
-            // Fetch token from DB
-            const [user] = await db.query("SELECT id FROM users WHERE email = ?", [uniqueEmail]);
-            if(user.length > 0) {
-                const [reset] = await db.query("SELECT token FROM password_resets WHERE user_id = ? ORDER BY id DESC LIMIT 1", [user[0].id]);
-                if (reset.length > 0) {
-                    token = reset[0].token;
-                }
-            }
-        }
+        if(forgotRes.status !== 200) console.log(forgotRes.body);
 
-        if (token) {
-            console.log("\n=== 3. TEST RESET PASSWORD WITH BEARER TOKEN ===");
-            const resetRes = await request('/api/auth/reset-password', 'POST', {
-                emailOrMobile: uniqueEmail,
-                password: 'newpassword123',
-                confirmpassword: 'newpassword123'
-            }, token); // Pass token to Authorization header
-            console.log(`Reset Password Status: ${resetRes.status} -> ${resetRes.status === 200 ? 'PASS' : 'FAIL'}`);
-        }
+        console.log("\n=== 3. TEST LOGIN WITH NEW PASSWORD ===");
+        const loginRes = await request('/api/auth/login', 'POST', {
+            emailOrMobile: uniqueEmail,
+            password: 'newpassword123'
+        });
+        console.log(`Login Status: ${loginRes.status} -> ${loginRes.status === 200 ? 'PASS' : 'FAIL'}`);
 
     } catch (error) {
         console.error("Test execution failed:", error);

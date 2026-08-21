@@ -102,17 +102,6 @@ const loginValidator = [
 /* ────────────────── forgot password validator ────────────────── */
 
 const forgotPasswordValidator = [
-    body('email')
-        .trim()
-        .notEmpty().withMessage('Email is required')
-        .isEmail().withMessage('Enter a valid email address')
-        .normalizeEmail(),
-    handleValidationErrors
-];
-
-/* ────────────────── reset password validator ────────────────── */
-
-const resetPasswordValidator = [
     body('emailOrMobile')
         .trim()
         .notEmpty().withMessage('Email or mobile number is required')
@@ -139,6 +128,5 @@ const resetPasswordValidator = [
 module.exports = { 
     registerValidator, 
     loginValidator, 
-    forgotPasswordValidator, 
-    resetPasswordValidator 
+    forgotPasswordValidator
 };
