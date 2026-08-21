@@ -16,12 +16,12 @@ const PasswordReset = {
         db.query(sql, values, callback);
     },
 
-    findByTokenAndOtp: function (token, otp, callback) {
+    findByToken: function (token, callback) {
         const sql = `
             SELECT * FROM password_resets
-            WHERE token = ? AND otp = ?
+            WHERE token = ?
         `;
-        db.query(sql, [token, otp], callback);
+        db.query(sql, [token], callback);
     },
 
     markAsUsed: function (id, callback) {

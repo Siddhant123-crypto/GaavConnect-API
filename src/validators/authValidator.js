@@ -219,9 +219,9 @@ const forgotPasswordValidator = [
 /* ────────────────── reset password validator ────────────────── */
 
 const resetPasswordValidator = [
-    body('emailOrMobile')
+    body('token')
         .trim()
-        .notEmpty().withMessage('Email or mobile number is required'),
+        .notEmpty().withMessage('Token is required'),
 
     body('password')
         .notEmpty().withMessage('Password is required')

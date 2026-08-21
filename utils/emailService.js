@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-const sendResetEmail = async (toEmail, otp, token) => {
+const sendResetEmail = async (toEmail, token) => {
     try {
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -20,9 +20,8 @@ const sendResetEmail = async (toEmail, otp, token) => {
             subject: "Password Reset Request",
             html: `
                 <h3>Hello,</h3>
-                <p>You requested a password reset. Please use the OTP below and the provided link to reset your password.</p>
-                <h2>OTP: <strong>${otp}</strong></h2>
-                <p>This OTP and link are valid for 15 minutes.</p>
+                <p>You requested a password reset. Please use the link below to reset your password.</p>
+                <p>This link is valid for 15 minutes.</p>
                 <p>Reset Link: <a href="${resetLink}">${resetLink}</a></p>
                 <p>If you did not request this, please ignore this email.</p>
             `,
