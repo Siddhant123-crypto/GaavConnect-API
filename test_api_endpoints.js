@@ -52,7 +52,7 @@ const runTests = async () => {
         const uniqueEmail = `test${Date.now()}@gmail.com`;
         
         console.log("=== 1. TEST REGISTER ===");
-        const regRes = await request('/api/auth/user/register', 'POST', {
+        const regRes = await request('/api/auth/register', 'POST', {
             fullName: 'Test User',
             mobile: `9${Math.floor(100000000 + Math.random() * 900000000)}`,
             email: uniqueEmail,
@@ -67,12 +67,12 @@ const runTests = async () => {
         console.log(`Register Status: ${regRes.status} -> ${regRes.status === 201 ? 'PASS' : 'FAIL'}`);
 
         console.log("\n=== 2. TEST DIRECT FORGOT PASSWORD ===");
-        const forgotRes = await request('/api/auth/forgot-password', 'POST', {
+        const forgotRes = await request('/api/auth/forget-password', 'POST', {
             emailOrMobile: uniqueEmail,
             password: 'newpassword123',
             confirmpassword: 'newpassword123'
-        }, 'dummy_token'); // Sending some token to bypass header check
-        console.log(`Forgot Password Status: ${forgotRes.status} -> ${forgotRes.status === 200 ? 'PASS' : 'FAIL'}`);
+        }); // Removed dummy token since Apoorva code doesn't check it
+        console.log(`Forget Password Status: ${forgotRes.status} -> ${forgotRes.status === 200 ? 'PASS' : 'FAIL'}`);
         if(forgotRes.status !== 200) console.log(forgotRes.body);
 
         console.log("\n=== 3. TEST LOGIN WITH NEW PASSWORD ===");
