@@ -53,4 +53,31 @@ const login = async (req, res, next) => {
     }
 };
 
-module.exports = { register, login };
+/* ═══════════════════════════════════════════
+   FORGET PASSWORD  –  POST /api/auth/forget-password
+═══════════════════════════════════════════ */
+
+const forgetPassword = async (req, res, next) => {
+    try {
+        const { emailOrMobile, password } = req.body;
+
+        const result = await authService.forgetPassword(emailOrMobile, password);
+
+        return ApiResponse.success(res, {
+            statusCode: 200,
+            message: result.message
+        });
+
+    } catch (error) {
+        if (error.statusCode) {
+            return ApiResponse.error(res, {
+                statusCode: error.statusCode,
+                message: error.message
+            });
+        }
+        next(error);
+    }
+};
+
+module.exports = { register, login, forgetPassword };
+

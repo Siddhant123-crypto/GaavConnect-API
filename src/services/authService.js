@@ -120,4 +120,30 @@ const login = async (emailOrMobile, password) => {
     return { user: userResponse, token };
 };
 
-module.exports = { register, login };
+/* ═══════════════════════════════════════════
+   FORGET PASSWORD
+   POST /api/auth/forget-password
+═══════════════════════════════════════════ */
+
+const forgetPassword = async (emailOrMobile, newPassword) => {
+
+    /* ── 1. find user ── */
+    const rows = await User.findByEmailOrMobile(emailOrMobile);
+    if (rows.length === 0)
+        throw Object.assign(new Error('User not found'), { statusCode: 404 });
+
+    const user = rows[0];
+
+    /* ── 2. hash new password ── */
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    /* ── 3. update password ── */
+    const updated = await User.updatePassword(user.id, hashedPassword);
+    if (!updated)
+        throw Object.assign(new Error('Failed to update password'), { statusCode: 500 });
+
+    return { message: 'Password updated successfully' };
+};
+
+module.exports = { register, login, forgetPassword };
+

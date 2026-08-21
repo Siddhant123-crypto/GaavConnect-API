@@ -73,7 +73,16 @@ const User = {
         `;
         const [rows] = await pool.query(sql, [identifier, identifier]);
         return rows;
+    },
+
+    /* ========================== UPDATE ========================== */
+
+    updatePassword: async function (id, hashedPassword) {
+        const sql = `UPDATE users SET password = ? WHERE id = ?`;
+        const [result] = await pool.query(sql, [hashedPassword, id]);
+        return result.affectedRows > 0;
     }
 };
 
 module.exports = User;
+
