@@ -1,11 +1,11 @@
 const db = require("../config/db");
-const { v4: uuidv4 } = require("uuid");
+const { randomUUID } = require("crypto");
 
 const Sarpanch = {
 
     create: function (sarpanchData, callback) {
 
-        const sarpanchId = uuidv4();
+        const sarpanchId = randomUUID();
 
         const sql = `
             INSERT INTO sarpanch
