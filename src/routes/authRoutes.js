@@ -20,5 +20,10 @@ router.post('/user/login', loginValidator, authController.login);
 // POST /api/auth/user/forget-password
 router.post('/user/forget-password', forgetPasswordValidator, authController.forgetPassword);
 
+// General routes (used for Sarpanch or general authentication)
+router.post('/register', registerValidator, authController.register);
+router.post('/login', loginValidator, authController.login);
+router.post('/forget-password', forgetPasswordValidator, authController.forgetPassword);
+
 module.exports = router;
 
