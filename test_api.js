@@ -1,11 +1,11 @@
-const http = require('http');
+const https = require('https');
 
 const makeRequest = (path, method, data) => {
     return new Promise((resolve, reject) => {
         const payload = JSON.stringify(data);
-        const req = http.request({
-            hostname: 'localhost',
-            port: 3000,
+        const req = https.request({
+            hostname: 'gaavconnect-api.onrender.com',
+            port: 443,
             path: path,
             method: method,
             headers: {
