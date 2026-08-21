@@ -87,6 +87,7 @@ const runTests = async () => {
         if (token) {
             console.log("\n=== 3. TEST RESET PASSWORD WITH BEARER TOKEN ===");
             const resetRes = await request('/api/auth/reset-password', 'POST', {
+                emailOrMobile: uniqueEmail,
                 password: 'newpassword123',
                 confirmpassword: 'newpassword123'
             }, token); // Pass token to Authorization header

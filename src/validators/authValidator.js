@@ -113,6 +113,15 @@ const forgotPasswordValidator = [
 /* ────────────────── reset password validator ────────────────── */
 
 const resetPasswordValidator = [
+    body('emailOrMobile')
+        .trim()
+        .notEmpty().withMessage('Email or mobile number is required')
+        .custom((v) => {
+            if (!isEmail(v) && !isMobile(v))
+                throw new Error('Provide a valid email address or 10-digit mobile number');
+            return true;
+        }),
+
     body('password')
         .notEmpty().withMessage('Password is required')
         .isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
