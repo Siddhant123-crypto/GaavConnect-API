@@ -7,6 +7,9 @@ const { registerValidator,
         forgotPasswordValidator,
         resetPasswordValidator }      = require('../validators/authValidator');
 
+// POST /api/auth/register (Generic route)
+router.post('/register', registerValidator, authController.register);
+
 // POST /api/auth/user/register
 router.post('/user/register', (req, res, next) => {
     req.body.userType = 'normal';
