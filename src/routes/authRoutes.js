@@ -7,7 +7,12 @@ const { registerValidator,
         forgetPasswordValidator }              = require('../validators/authValidator');
 
 // POST /api/auth/user/register
-router.post('/user/register', registerValidator, authController.register);
+router.post(
+    '/user/register',
+    (req, res, next) => { req.body.userType = 'normal'; next(); },
+    registerValidator,
+    authController.register
+);
 
 // POST /api/auth/user/login
 router.post('/user/login', loginValidator, authController.login);
