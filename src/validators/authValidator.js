@@ -62,8 +62,8 @@ const registerValidator = [
     body('userType')
         .trim()
         .notEmpty().withMessage('User type is required')
-        .isIn(['normal', 'sarpanch'])
-        .withMessage("User type must be 'normal' or 'sarpanch'"),
+        .isIn(['gavkari', 'sarpanch'])
+        .withMessage("User type must be 'gavkari' or 'sarpanch'"),
 
     body('password')
         .notEmpty().withMessage('Password is required')

@@ -9,7 +9,7 @@ const { registerValidator,
 // POST /api/auth/user/register
 router.post(
     '/user/register',
-    (req, res, next) => { req.body.userType = 'normal'; next(); },
+    (req, res, next) => { req.body.userType = 'gavkari'; next(); },
     registerValidator,
     authController.register
 );
